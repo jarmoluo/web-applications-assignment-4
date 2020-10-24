@@ -1,6 +1,6 @@
 import "./styles.css";
 
-var board, activePlayer, mark, timerInterval;
+var board, activePlayer, mark;
 
 if (document.readyState !== "loading") {
   console.log("Document ready. Starting program..");
@@ -18,14 +18,14 @@ function markTableCell(cell) {
   var index = cell.id;
   var rowIndex = cell.id.split("-")[0];
   var colIndex = cell.id.split("-")[1];
-  var cellNode;
+  var markNode;
 
   // Tarkistetaan, onko solu tyhjä
   if (board[rowIndex][colIndex] === undefined) {
     // Lisätään pelaajan merkki valittuun soluun
     board[rowIndex][colIndex] = mark;
-    cellNode = document.getElementById(index);
-    cellNode.classList.add("player" + activePlayer);
+    markNode = document.createTextNode(mark);
+    document.getElementById(index).appendChild(markNode);
     // Tarkistetaan pelitilanne
     checkBoard(rowIndex, colIndex);
     // Vaihdetaan pelivuoro
@@ -48,10 +48,14 @@ function generateBoard(sideLength) {
 
     // Lisätään sarakkeet/solut
     for (var j = 0; j < sideLength; j++) {
+      //board[i + "-" + j] = undefined;
       board[i][j] = undefined;
       newCol = document.createElement("td");
       newCol.setAttribute("id", i + "-" + j);
-      newCol.setAttribute("class", "cell");
+      newCol.style.border = "thin solid";
+      newCol.style.width = (100 / sideLength).toString() + "%";
+      newCol.style.height = (100 / sideLength).toString() + "%";
+      newCol.style.textAlign = "center";
       newCol.onclick = function () {
         markTableCell(this);
       };
@@ -59,6 +63,9 @@ function generateBoard(sideLength) {
     }
 
     table.appendChild(newRow);
+    table.style.borderCollapse = "collapse";
+    table.style.width = (sideLength * 40).toString() + "px";
+    table.style.height = (sideLength * 40).toString() + "px";
   }
 }
 
@@ -93,7 +100,6 @@ function changePlayer() {
   activePlayer = activePlayer === 1 ? 2 : 1;
   // Valitaan merkki vuorossa olevan pelaajan mukaan
   mark = activePlayer === 1 ? "X" : "O";
-  startTimer();
 }
 
 function endGame() {
@@ -101,36 +107,8 @@ function endGame() {
   initialize();
 }
 
-function startTimer() {
-  var width = 0;
-  var seconds = 0;
-  if (timerInterval !== undefined) clearInterval(timerInterval);
-  timerInterval = setInterval(frame, 1000);
-
-  var elem = document.getElementById("myBar");
-  elem.style.width = width + "%";
-  document.getElementById("turn").innerHTML =
-    "Player " + activePlayer + " turn";
-  document.getElementById("timer").innerHTML = seconds + " s";
-
-  // Funktio, jota kutsutaan 1s välein
-  function frame() {
-    if (width >= 100) {
-      clearInterval(timerInterval);
-      changePlayer();
-    } else {
-      seconds++;
-      width += 10;
-      elem.style.width = width + "%";
-      document.getElementById("timer").innerHTML = seconds + " s";
-    }
-  }
-}
-
 function initialize() {
   generateBoard(5);
   activePlayer = 1;
   mark = "X";
-  document.getElementById("turn").innerHTML =
-    "Player " + activePlayer + " turn";
 }
